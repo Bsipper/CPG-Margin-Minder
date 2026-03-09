@@ -1,0 +1,255 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-width: 800px;
+}
+
+.feesList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+}
+
+.emptyText {
+    color: var(--color-text-muted);
+    font-style: italic;
+    text-align: center;
+    padding: var(--space-4);
+}
+
+.feeCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    background-color: var(--color-surface-hover);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.feeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.inputGroupTop {
+    display: flex;
+    gap: var(--space-4);
+    flex: 1;
+}
+
+.inputGroupTop>* {
+    flex: 1;
+}
+
+.feeDetails {
+    display: flex;
+    gap: var(--space-6);
+    margin-top: var(--space-2);
+}
+
+.feeDetailCol {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.feeDetailCol h4 {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.feeDivider {
+    width: 1px;
+    background-color: var(--color-border);
+}
+
+.freeFillInputs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.mathSymbol {
+    color: var(--color-text-muted);
+    font-weight: bold;
+    font-size: var(--font-size-xl);
+    padding-top: var(--space-6);
+}
+
+.freeFillCosts {
+    background: var(--color-surface-base);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-2);
+}
+
+.freeFillCosts p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    display: flex;
+    justify-content: space-between;
+}
+
+.feeCardTotal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--space-2);
+    font-weight: 500;
+}
+
+.feeROISection {
+    display: flex;
+    gap: var(--space-6);
+}
+
+.roiMetric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.feeCardTotal span {
+    font-size: var(--font-size-lg);
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.deleteBtn {
+    background: transparent;
+    border: none;
+    color: var(--color-red);
+    padding: var(--space-3);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    height: 40px;
+}
+
+.deleteBtn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+.addBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.actions {
+    display: flex;
+}
+
+.summaryCard {
+    background-color: var(--color-surface);
+}
+
+.summaryGrid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    background: var(--color-surface-base);
+    padding: var(--space-6);
+    border-radius: var(--radius-md);
+    margin-top: var(--space-4);
+}
+
+.summaryItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: var(--space-3);
+    border-bottom: 1px dashed var(--color-border);
+}
+
+.label {
+    font-weight: 500;
+    color: var(--color-text-primary);
+}
+
+.value {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-text-primary);
+}
+
+.valueHighlight {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-red);
+}
+
+.connector {
+    text-align: center;
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-muted);
+}
+
+.summaryBlock {
+    margin-top: var(--space-4);
+    background: var(--color-primary-base);
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    text-align: center;
+}
+
+.summaryBlock h3 {
+    margin-bottom: var(--space-6);
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
+
+.breakEvenResults {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-12);
+}
+
+.resultItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.bigNumber {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    line-height: 1;
+}
+
+.resultLabel {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.errorText {
+    color: var(--color-red);
+    font-weight: 500;
+    line-height: 1.5;
+    padding: var(--space-4);
+}

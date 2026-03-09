@@ -1,0 +1,294 @@
+import React, { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { MockDB } from '../../api/mockDb';
+import { Company, User } from '../../types';
+import { v4 as uuidv4 } from 'uuid';
+import { Plus, Users, LogOut, Building2, Edit2, Trash2, X, Check } from 'lucide-react';
+import styles from './SuperAdminDashboard.module.css';
+
+interface Props {
+    onSelectCompany: (companyId: string) => void;
+}
+
+export function SuperAdminDashboard({ onSelectCompany }: Props) {
+    const { user, logout } = useAuth();
+
+    if (!user || user.role !== 'super_admin') return null;
+
+    const [companies, setCompanies] = useState<Company[]>(MockDB.getCompanies());
+    const [users, setUsers] = useState<User[]>(MockDB.getUsers());
+
+    const [isAddingCompany, setIsAddingCompany] = useState(false);
+    const [newCompanyName, setNewCompanyName] = useState('');
+
+    const [editingCompanyId, setEditingCompanyId] = useState<string | null>(null);
+    const [editCompanyName, setEditCompanyName] = useState('');
+
+    const [managingUsersForCompany, setManagingUsersForCompany] = useState<string | null>(null);
+    const [isAddingUser, setIsAddingUser] = useState(false);
+    const [newUserEmail, setNewUserEmail] = useState('');
+    const [newUserRole, setNewUserRole] = useState<'admin' | 'distributor' | 'retailer'>('admin');
+
+    const handleAddCompany = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newCompanyName.trim()) return;
+
+        const newComp: Company = {
+            id: `comp_${uuidv4()}`,
+            name: newCompanyName
+        };
+
+        MockDB.saveCompany(newComp);
+        setCompanies(MockDB.getCompanies());
+        setNewCompanyName('');
+        setIsAddingCompany(false);
+    };
+
+    const handleDeleteCompany = (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete this Company and ALL associated data? This cannot be undone.')) {
+            MockDB.deleteCompany(id);
+            setCompanies(MockDB.getCompanies());
+        }
+    };
+
+    const startEditCompany = (e: React.MouseEvent, c: Company) => {
+        e.stopPropagation();
+        setEditingCompanyId(c.id);
+        setEditCompanyName(c.name);
+    };
+
+    const saveEditCompany = (e: React.MouseEvent, c: Company) => {
+        e.stopPropagation();
+        if (!editCompanyName.trim()) return;
+
+        const updated = { ...c, name: editCompanyName };
+        MockDB.saveCompany(updated);
+        setCompanies(MockDB.getCompanies());
+        setEditingCompanyId(null);
+        setEditCompanyName('');
+    };
+
+    const cancelEditCompany = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingCompanyId(null);
+        setEditCompanyName('');
+    };
+
+    const [editingUserId, setEditingUserId] = useState<string | null>(null);
+    const [editUserEmail, setEditUserEmail] = useState('');
+    const [editUserRole, setEditUserRole] = useState<'admin' | 'distributor' | 'retailer'>('admin');
+
+    const handleAddUser = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newUserEmail.trim() || !managingUsersForCompany) return;
+
+        const newUser: User = {
+            id: `usr_${uuidv4()}`,
+            email: newUserEmail,
+            role: newUserRole,
+            companyId: managingUsersForCompany
+        };
+
+        MockDB.saveUser(newUser);
+        setUsers(MockDB.getUsers());
+        setNewUserEmail('');
+        setIsAddingUser(false);
+    };
+
+    const handleDeleteUser = (id: string) => {
+        if (confirm('Are you sure you want to delete this User?')) {
+            MockDB.deleteUser(id);
+            setUsers(MockDB.getUsers());
+        }
+    };
+
+    const startEditUser = (u: User) => {
+        setEditingUserId(u.id);
+        setEditUserEmail(u.email);
+        setEditUserRole(u.role as 'admin' | 'distributor' | 'retailer');
+    };
+
+    const saveEditUser = () => {
+        if (!editUserEmail.trim()) return;
+
+        const targetUser = users.find(x => x.id === editingUserId);
+        if (targetUser) {
+            const updated = { ...targetUser, email: editUserEmail, role: editUserRole };
+            MockDB.saveUser(updated);
+            setUsers(MockDB.getUsers());
+        }
+        setEditingUserId(null);
+    };
+
+    const cancelEditUser = () => {
+        setEditingUserId(null);
+    };
+
+    const getCompanyUsers = (companyId: string) => users.filter(u => u.companyId === companyId);
+
+    return (
+        <div className={styles.container}>
+            <header className={styles.header}>
+                <div className={styles.headerContent}>
+                    <div>
+                        <h1>Company Dashboard</h1>
+                        <p>Welcome back, Super Admin ({user.email})</p>
+                    </div>
+                    <button className={styles.logoutBtn} onClick={logout}>
+                        <LogOut size={16} /> Sign Out
+                    </button>
+                </div>
+            </header>
+
+            <main className={styles.main}>
+                <div className={styles.sectionHeader}>
+                    <h2>Client Companies</h2>
+                    <button className={styles.addBtn} onClick={() => setIsAddingCompany(true)}>
+                        <Plus size={16} /> Add Company
+                    </button>
+                </div>
+
+                {isAddingCompany && (
+                    <form onSubmit={handleAddCompany} className={styles.addForm}>
+                        <input
+                            type="text"
+                            value={newCompanyName}
+                            onChange={e => setNewCompanyName(e.target.value)}
+                            placeholder="E.g., Acme Corp Food Division"
+                            autoFocus
+                        />
+                        <button type="submit" className={styles.saveBtn}>Save</button>
+                        <button type="button" className={styles.cancelBtn} onClick={() => setIsAddingCompany(false)}>Cancel</button>
+                    </form>
+                )}
+
+                <div className={styles.companyGrid}>
+                    {companies.map(c => (
+                        <div key={c.id} className={styles.companyCard}>
+                            <div className={styles.cardTop}>
+                                {editingCompanyId === c.id ? (
+                                    <div className={styles.editModeBody} style={{ flex: 1, marginRight: 12 }}>
+                                        <input
+                                            className={styles.editInput}
+                                            value={editCompanyName}
+                                            onChange={e => setEditCompanyName(e.target.value)}
+                                            autoFocus
+                                            onKeyDown={e => {
+                                                if (e.key === 'Enter') saveEditCompany(e as any, c);
+                                                if (e.key === 'Escape') cancelEditCompany(e as any);
+                                            }}
+                                        />
+                                        <div className={styles.editActions} style={{ display: 'flex', gap: '8px' }}>
+                                            <button className={styles.saveBtn} onClick={(e) => saveEditCompany(e, c)} style={{ padding: '4px 12px', fontSize: '0.875rem' }}>Save</button>
+                                            <button className={styles.cancelBtn} onClick={cancelEditCompany} style={{ padding: '4px 12px', fontSize: '0.875rem' }}>Cancel</button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className={styles.cardHeader}>
+                                        <Building2 className={styles.cardIcon} size={24} />
+                                        <h3>{c.name}</h3>
+                                        <div className={styles.cardActionsSmall}>
+                                            <button onClick={(e) => startEditCompany(e, c)} className={styles.iconBtn}><Edit2 size={16} /></button>
+                                            <button onClick={(e) => handleDeleteCompany(e, c.id)} className={`${styles.iconBtn} ${styles.danger}`}><Trash2 size={16} /></button>
+                                        </div>
+                                    </div>
+                                )}
+                                <span className={styles.idBadge}>{c.id}</span>
+                            </div>
+
+                            <div className={styles.cardActions}>
+                                <button className={styles.actionBtn} onClick={() => setManagingUsersForCompany(c.id)}>
+                                    <Users size={16} /> Manage Users ({getCompanyUsers(c.id).length})
+                                </button>
+                                <button className={styles.actionBtnPrimary} onClick={() => onSelectCompany(c.id)}>
+                                    Manage Products &rarr;
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {managingUsersForCompany && (
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modal}>
+                            <h2>Users for: {companies.find(c => c.id === managingUsersForCompany)?.name}</h2>
+
+                            <div className={styles.userList}>
+                                {getCompanyUsers(managingUsersForCompany).map(u => (
+                                    <div key={u.id} className={styles.userRow}>
+                                        {editingUserId === u.id ? (
+                                            <div className={styles.editModeBody} style={{ flexDirection: 'row', width: '100%', alignItems: 'center', marginTop: 0 }}>
+                                                <input
+                                                    className={styles.editInput}
+                                                    type="email"
+                                                    value={editUserEmail}
+                                                    onChange={e => setEditUserEmail(e.target.value)}
+                                                    autoFocus
+                                                />
+                                                <select
+                                                    className={styles.editInput}
+                                                    style={{ width: 'auto' }}
+                                                    value={editUserRole}
+                                                    onChange={e => setEditUserRole(e.target.value as any)}
+                                                >
+                                                    <option value="admin">Client Admin</option>
+                                                    <option value="distributor">Distributor</option>
+                                                    <option value="retailer">Retailer</option>
+                                                </select>
+                                                <button className={styles.confirmBtn} onClick={saveEditUser}><Check size={16} /></button>
+                                                <button className={styles.cancelIconBtn} onClick={cancelEditUser}><X size={16} /></button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                    <span className={styles.userEmail}>{u.email}</span>
+                                                    <span className={styles.userRoleBadge}>{u.role}</span>
+                                                </div>
+                                                <div className={styles.cardActionsSmall} style={{ opacity: 1 }}>
+                                                    <button onClick={() => startEditUser(u)} className={styles.iconBtn}><Edit2 size={16} /></button>
+                                                    <button onClick={() => handleDeleteUser(u.id)} className={`${styles.iconBtn} ${styles.danger}`}><Trash2 size={16} /></button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {!isAddingUser ? (
+                                <button className={styles.addBtn} onClick={() => setIsAddingUser(true)}>
+                                    <Plus size={16} /> Add User
+                                </button>
+                            ) : (
+                                <form onSubmit={handleAddUser} className={styles.addUserForm}>
+                                    <input
+                                        type="email"
+                                        value={newUserEmail}
+                                        onChange={e => setNewUserEmail(e.target.value)}
+                                        placeholder="User Email"
+                                        autoFocus
+                                        required
+                                    />
+                                    <select value={newUserRole} onChange={e => setNewUserRole(e.target.value as any)}>
+                                        <option value="admin">Client Admin</option>
+                                        <option value="distributor">Distributor</option>
+                                        <option value="retailer">Retailer</option>
+                                    </select>
+                                    <button type="submit" className={styles.saveBtn}>Save</button>
+                                    <button type="button" className={styles.cancelBtn} onClick={() => setIsAddingUser(false)}>Cancel</button>
+                                </form>
+                            )}
+
+                            <button className={styles.closeModalBtn} onClick={() => {
+                                setManagingUsersForCompany(null);
+                                setIsAddingUser(false);
+                            }}>
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </main>
+        </div>
+    );
+}

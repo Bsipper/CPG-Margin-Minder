@@ -1,0 +1,125 @@
+.sidebar {
+    width: 280px;
+    background-color: var(--color-secondary);
+    color: var(--color-text-inverse);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width var(--transition-normal);
+}
+
+.logo {
+    height: 104px;
+    display: flex;
+    align-items: center;
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logoImage {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+}
+
+.nav {
+    padding: var(--space-4) var(--space-3);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.navItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.navItem:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-inverse);
+}
+
+.navItemActive {
+    background-color: var(--color-primary) !important;
+    color: var(--color-text-inverse);
+    box-shadow: var(--shadow-md);
+}
+
+.scenarioSection {
+    margin-top: auto;
+    padding: var(--space-4) var(--space-4);
+    background-color: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.scenarioLabel {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-2);
+}
+
+.scenarioSelect {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text-inverse);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    outline: none;
+    cursor: pointer;
+}
+
+.scenarioSelect:focus {
+    border-color: var(--color-primary);
+}
+
+.scenarioSelect option {
+    background-color: var(--color-secondary);
+    color: var(--color-text-inverse);
+}
+
+.footerSection {
+    padding: var(--space-4);
+    background-color: rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.signOutBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3);
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-text-inverse);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.signOutBtn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    /* Subtle red hover */
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}

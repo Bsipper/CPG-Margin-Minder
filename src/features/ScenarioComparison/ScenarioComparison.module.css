@@ -1,0 +1,192 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-width: 1200px;
+}
+
+.headerActions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--color-surface-base);
+    padding: var(--space-4) var(--space-6);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+}
+
+.info p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.actionBtns {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.btnSecondary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background-color: var(--color-surface-hover);
+    border: 1px solid var(--color-border-strong);
+    color: var(--color-text-primary);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+}
+
+.btnSecondary:hover {
+    background-color: var(--color-border);
+}
+
+.btnDanger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: transparent;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+}
+
+.btnDanger:hover {
+    background-color: var(--color-danger-bg);
+}
+
+.comparisonGrid {
+    display: flex;
+    overflow-x: auto;
+    background-color: var(--color-surface-base);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+.metricCol {
+    flex: 0 0 240px;
+    background-color: var(--color-surface-hover);
+    border-right: 1px solid var(--color-border);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+}
+
+.dataCol {
+    flex: 1;
+    min-width: 200px;
+    border-right: 1px solid var(--color-border);
+}
+
+.dataColActive {
+    flex: 1;
+    min-width: 200px;
+    border-right: 1px solid var(--color-border);
+    background-color: var(--color-primary-light);
+    border-bottom: 3px solid var(--color-primary);
+}
+
+/* Cells */
+.headerCell {
+    height: 80px;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 2px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.scenName {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scenActions {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.iconBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    padding: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.iconBtn:hover {
+    color: var(--color-primary);
+}
+
+.iconBtnDel {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    padding: 2px;
+    border-radius: var(--radius-sm);
+}
+
+.iconBtnDel:hover {
+    color: var(--color-danger);
+}
+
+.activateText {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-primary);
+}
+
+.sectionTitle {
+    height: 40px;
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: flex-end;
+}
+
+.sectionPlaceholder {
+    height: 40px;
+}
+
+.cell {
+    height: 48px;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+}
+
+.cellRowHighlight {
+    height: 56px;
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    background-color: var(--color-surface-hover);
+}
+
+.cellContentHighlight {
+    height: 56px;
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
