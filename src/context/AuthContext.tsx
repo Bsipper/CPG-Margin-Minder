@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { MockDB } from '../api/mockDb';
+import { v4 as uuidv4 } from 'uuid';
 
 interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     login: (email: string, password?: string) => void;
+    signup: (email: string, password?: string, companyName?: string) => void;
     logout: () => void;
     acceptTerms: () => void;
 }
@@ -14,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     isLoading: true,
     login: () => { },
+    signup: () => { },
     logout: () => { },
     acceptTerms: () => { },
 });
@@ -61,6 +64,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     };
 
+    const signup = (email: string, _password?: string, companyName?: string) => {
+        const existingUser = MockDB.getUsers().find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (existingUser) {
+            alert('A user with this email already exists.');
+            return;
+        }
+
+        const newCompanyId = `comp_${uuidv4()}`;
+        const newCompany = {
+            id: newCompanyId,
+            name: companyName || 'New Company'
+        };
+        MockDB.saveCompany(newCompany);
+
+        const newUser: User = {
+            id: `usr_${uuidv4()}`,
+            email: email,
+            role: 'admin',
+            companyId: newCompanyId,
+            hasAcceptedTerms: false
+        };
+        MockDB.saveUser(newUser);
+
+        setUser(newUser);
+        localStorage.setItem('session_user_id', newUser.id);
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('session_user_id');
@@ -74,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout, acceptTerms }}>
+        <AuthContext.Provider value={{ user, isLoading, login, signup, logout, acceptTerms }}>
             {children}
         </AuthContext.Provider>
     );

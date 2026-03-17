@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { MainLayout } from './components/layout/MainLayout';
 import { LandingPage } from './features/Landing/LandingPage';
 import { Login } from './features/Auth/Login';
+import { SignUp } from './features/Auth/SignUp';
 import { TermsOfUse } from './features/Auth/TermsOfUse';
 import { CompanyDashboard } from './features/Company/CompanyDashboard';
 import { SuperAdminDashboard } from './features/SuperAdmin/SuperAdminDashboard';
@@ -11,7 +12,7 @@ import { MockDB } from './api/mockDb';
 
 function AppContent() {
   const { user, isLoading } = useAuth();
-  const [showLogin, setShowLogin] = useState(false);
+  const [authMode, setAuthMode] = useState<'none' | 'login' | 'signup'>('none');
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(null);
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
@@ -34,10 +35,13 @@ function AppContent() {
   }
 
   if (!user) {
-    if (showLogin) {
-      return <Login onBack={() => setShowLogin(false)} />;
+    if (authMode === 'login') {
+      return <Login onBack={() => setAuthMode('none')} onSignUpClick={() => setAuthMode('signup')} />;
     }
-    return <LandingPage onLoginClick={() => setShowLogin(true)} />;
+    if (authMode === 'signup') {
+      return <SignUp onBack={() => setAuthMode('none')} onLoginClick={() => setAuthMode('login')} />;
+    }
+    return <LandingPage onLoginClick={() => setAuthMode('login')} onSignUpClick={() => setAuthMode('signup')} />;
   }
 
   if (user.hasAcceptedTerms === false || user.hasAcceptedTerms === undefined) {

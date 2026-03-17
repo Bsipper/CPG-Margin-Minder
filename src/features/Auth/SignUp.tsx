@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import styles from './Login.module.css';
+import styles from './SignUp.module.css';
 
 interface Props {
     onBack?: () => void;
-    onSignUpClick?: () => void;
+    onLoginClick: () => void;
 }
 
-export function Login({ onBack, onSignUpClick }: Props) {
+export function SignUp({ onBack, onLoginClick }: Props) {
+    const [companyName, setCompanyName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useAuth();
+    const { signup } = useAuth();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        login(email, password);
+        signup(email, password, companyName);
     };
 
     return (
@@ -28,17 +29,28 @@ export function Login({ onBack, onSignUpClick }: Props) {
                 )}
                 <div className={styles.header}>
                     <img src="/logo.png" alt="CPG Margin Minder Logo" className={styles.logoImage} />
-                    <p>Please sign in to access your company scenarios.</p>
+                    <p>Create an account to track your company scenarios.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
+                    <div className={styles.inputGroup}>
+                        <label>Company Name</label>
+                        <input
+                            type="text"
+                            value={companyName}
+                            onChange={e => setCompanyName(e.target.value)}
+                            placeholder="Your Company Inc."
+                            required
+                        />
+                    </div>
+
                     <div className={styles.inputGroup}>
                         <label>Email Address</label>
                         <input
                             type="email"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            placeholder="admin@sipper.com"
+                            placeholder="admin@yourcompany.com"
                             required
                         />
                     </div>
@@ -50,24 +62,15 @@ export function Login({ onBack, onSignUpClick }: Props) {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             placeholder="••••••••"
+                            required
                         />
-                        <span className={styles.helperText}>Required for Super Admin, optional for demo accounts.</span>
                     </div>
 
-                    <button type="submit" className={styles.loginBtn}>Sign In</button>
+                    <button type="submit" className={styles.signupBtn}>Sign Up</button>
                 </form>
 
-                <div className={styles.demoAccounts}>
-                    <p style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
-                        Don't have an account? <span style={{ color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline', fontWeight: 500 }} onClick={onSignUpClick}>Sign Up</span>
-                    </p>
-                    <p><strong>Demo Accounts:</strong></p>
-                    <ul>
-                        <li onClick={() => setEmail('Bill@cascadiafoodbev.com')}>Super Admin: <code>Bill@cascadiafoodbev.com</code></li>
-                        <li onClick={() => setEmail('admin@sipper.com')}>Admin: <code>admin@sipper.com</code></li>
-                        <li onClick={() => setEmail('distributor@demo.com')}>Distributor: <code>distributor@demo.com</code></li>
-                        <li onClick={() => setEmail('buyer@retailer.com')}>Retailer: <code>buyer@retailer.com</code></li>
-                    </ul>
+                <div className={styles.loginLink}>
+                    Already have an account? <a onClick={onLoginClick}>Sign In</a>
                 </div>
             </div>
         </div>

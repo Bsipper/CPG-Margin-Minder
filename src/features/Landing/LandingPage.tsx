@@ -4,9 +4,10 @@ import styles from './LandingPage.module.css';
 
 interface Props {
     onLoginClick: () => void;
+    onSignUpClick?: () => void;
 }
 
-export function LandingPage({ onLoginClick }: Props) {
+export function LandingPage({ onLoginClick, onSignUpClick }: Props) {
     return (
         <div className={styles.container}>
             {/* Header / Navbar */}
@@ -22,6 +23,9 @@ export function LandingPage({ onLoginClick }: Props) {
                         <button className={styles.loginBtn} onClick={onLoginClick}>
                             Sign In
                         </button>
+                        <button className={styles.loginBtn} style={{ background: 'var(--color-primary)', color: 'white', border: 'none' }} onClick={onSignUpClick}>
+                            Sign Up
+                        </button>
                     </nav>
                 </div>
             </header>
@@ -36,8 +40,8 @@ export function LandingPage({ onLoginClick }: Props) {
                         The ultimate profit modeling engine for food and beverage brands. Calculate COGS, model trade spend, and predict true contribution margins across the entire retail supply chain.
                     </p>
                     <div className={styles.heroActions}>
-                        <button className={styles.primaryActionBtn} onClick={onLoginClick}>
-                            Access Your Dashboard <ArrowRight size={18} />
+                        <button className={styles.primaryActionBtn} onClick={onSignUpClick}>
+                            Start for Free <ArrowRight size={18} />
                         </button>
                     </div>
                 </div>
