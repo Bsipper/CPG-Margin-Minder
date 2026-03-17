@@ -12,10 +12,17 @@ export function SignUp({ onBack, onLoginClick }: Props) {
     const [companyName, setCompanyName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
     const { signup } = useAuth();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+        if (password !== confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
         signup(email, password, companyName);
     };
 
@@ -65,6 +72,19 @@ export function SignUp({ onBack, onLoginClick }: Props) {
                             required
                         />
                     </div>
+
+                    <div className={styles.inputGroup}>
+                        <label>Confirm Password</label>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            placeholder="••••••••"
+                            required
+                        />
+                    </div>
+
+                    {error && <div style={{ color: '#ef4444', fontSize: 'var(--font-size-sm)' }}>{error}</div>}
 
                     <button type="submit" className={styles.signupBtn}>Sign Up</button>
                 </form>
