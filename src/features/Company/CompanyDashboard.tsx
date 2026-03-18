@@ -5,6 +5,8 @@ import { Product, User, UserRole } from '../../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Package, LogOut, Edit2, Trash2, X, Check, Users } from 'lucide-react';
 import styles from './CompanyDashboard.module.css';
+import layoutStyles from '../../components/layout/MainLayout.module.css';
+import { Sidebar } from '../../components/layout/Sidebar';
 
 interface Props {
     overrideCompanyId?: string;
@@ -38,6 +40,9 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
     const [editUserEmail, setEditUserEmail] = useState('');
     const [editUserRole, setEditUserRole] = useState<UserRole>('distributor');
 
+    const [confirmDeleteProduct, setConfirmDeleteProduct] = useState<string | null>(null);
+    const [confirmDeleteUser, setConfirmDeleteUser] = useState<User | null>(null);
+
     if (!user) return null;
 
     // --- Product Handlers ---
@@ -61,10 +66,14 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
 
     const handleDeleteProduct = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (confirm('Are you sure you want to delete this Product Line? This cannot be undone.')) {
-            MockDB.deleteProduct(id);
-            setProducts(MockDB.getProducts(targetCompanyId));
-        }
+        setConfirmDeleteProduct(id);
+    };
+
+    const confirmExecuteDeleteProduct = () => {
+        if (!confirmDeleteProduct) return;
+        MockDB.deleteProduct(confirmDeleteProduct);
+        setProducts(MockDB.getProducts(targetCompanyId));
+        setConfirmDeleteProduct(null);
     };
 
     const startEditProduct = (e: React.MouseEvent, p: Product) => {
@@ -109,11 +118,15 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
         setIsAddingUser(false);
     };
 
-    const handleDeleteUser = (id: string, email: string) => {
-        if (confirm(`Are you sure you want to revoke access for ${email}?`)) {
-            MockDB.deleteUser(id);
-            setCompanyUsers(MockDB.getUsers().filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
-        }
+    const handleDeleteUser = (u: User) => {
+        setConfirmDeleteUser(u);
+    };
+
+    const confirmExecuteDeleteUser = () => {
+        if (!confirmDeleteUser) return;
+        MockDB.deleteUser(confirmDeleteUser.id);
+        setCompanyUsers(MockDB.getUsers().filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
+        setConfirmDeleteUser(null);
     };
 
     const startEditUser = (u: User) => {
@@ -137,9 +150,17 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
     };
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div className={styles.headerContent}>
+        <div className={layoutStyles.layout}>
+            <Sidebar 
+                activeTab="home" 
+                onTabChange={() => {}} 
+                onGoAdmin={onBack} 
+                onGoHome={() => {}} // already home
+            />
+            <div className={layoutStyles.mainContent} style={{ overflowY: 'auto' }}>
+                <div className={styles.container}>
+                    <header className={styles.header}>
+                        <div className={styles.headerContent}>
                     <div>
                         <h1>Product Lines {overrideCompanyId && "(Super Admin View)"}</h1>
                         <p>Welcome back, {user.email} (Role: {user.role})</p>
@@ -331,7 +352,7 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
                                                                     <button className={styles.iconBtn} onClick={() => startEditUser(u)} title="Edit Role">
                                                                         <Edit2 size={16} />
                                                                     </button>
-                                                                    <button className={`${styles.iconBtn} ${styles.danger}`} onClick={() => handleDeleteUser(u.id, u.email)} title="Remove Access">
+                                                                    <button className={`${styles.iconBtn} ${styles.danger}`} onClick={() => handleDeleteUser(u)} title="Remove Access">
                                                                         <Trash2 size={16} />
                                                                     </button>
                                                                 </div>
@@ -348,6 +369,35 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
                     </div>
                 )}
             </main>
+
+            {/* Modals for Custom Confirmation (bypassing native browser suppression) */}
+            {confirmDeleteProduct && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+                    <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px' }}>
+                        <h2 style={{ marginTop: 0, color: 'white' }}>Delete Product?</h2>
+                        <p style={{ color: 'var(--color-text-secondary)', margin: '1rem 0' }}>Are you sure you want to delete this Product Line? This cannot be undone.</p>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button onClick={confirmExecuteDeleteProduct} style={{ padding: '8px 16px', background: 'var(--color-rose)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Delete</button>
+                            <button onClick={() => setConfirmDeleteProduct(null)} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'white', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {confirmDeleteUser && (
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+                    <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px' }}>
+                        <h2 style={{ marginTop: 0, color: 'white' }}>Revoke User Access?</h2>
+                        <p style={{ color: 'var(--color-text-secondary)', margin: '1rem 0' }}>Are you sure you want to revoke access for {confirmDeleteUser.email}?</p>
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button onClick={confirmExecuteDeleteUser} style={{ padding: '8px 16px', background: 'var(--color-rose)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Revoke Access</button>
+                            <button onClick={() => setConfirmDeleteUser(null)} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'white', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            </div>
+        </div>
         </div>
     );
 }

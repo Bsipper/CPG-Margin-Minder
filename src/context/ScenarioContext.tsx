@@ -36,17 +36,24 @@ export function ScenarioProvider({ children, productId }: { children: ReactNode,
     // Initialize default scenario if empty
     useEffect(() => {
         if (scenarios.length === 0) {
-            // Find the product to build the default scenario
-            const allProducts = MockDB.getProducts(''); // For mock DB, we can just fetch the product from storage if we had a getProductById
-            // We'll just read from localStorage directly or pass it down via MockDB.
-            // Let's create a generic default
+            // Find the product to build the default scenario securely
+            const allowedCompanyId = user?.role === 'super_admin' ? undefined : user?.companyId;
+            const allProducts = MockDB.getProducts(allowedCompanyId); 
+            const existingProductDef = allProducts.find(p => p.id === productId);
+
+            if (!existingProductDef) {
+                console.error("Security Block: Unauthorized access to a product outside the user's company bounds.");
+                // Return early, don't initialize a scenario for a product they don't own.
+                return;
+            }
+
             const defaultScen: Scenario = {
                 id: uuidv4(),
                 productId: productId,
                 name: 'Base Scenario (Default)',
-                product: { id: productId, companyId: '', name: 'Product', sku: 'SKU', casePack: 12 },
+                product: existingProductDef || { id: productId, companyId: '', name: 'New Product', sku: 'SKU', casePack: 12 },
                 cogs: {
-                    inputMethod: 'total',
+                    inputMethod: existingProductDef?.supplierBaseCost ? 'supplier' : 'total',
                     totalCaseCost: 10.00,
                     lineItems: []
                 },
@@ -86,6 +93,11 @@ export function ScenarioProvider({ children, productId }: { children: ReactNode,
             }
             return [...prev, { ...scenario, lastModified: Date.now() }];
         });
+        
+        // Keep the database Product definition fully synced with the Scenario Product Setup
+        if (scenario.product) {
+            MockDB.saveProduct(scenario.product);
+        }
     };
 
     const updateActiveScenario = (updater: Scenario | ((prev: Scenario) => Scenario)) => {
@@ -171,4 +183,8 @@ export function useScenario() {
         throw new Error('useScenario must be used within a ScenarioProvider');
     }
     return context;
+}
+
+export function useScenarioOptional() {
+    return useContext(ScenarioContext);
 }

@@ -5,6 +5,8 @@ import { Company, User } from '../../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Plus, Users, LogOut, Building2, Edit2, Trash2, X, Check } from 'lucide-react';
 import styles from './SuperAdminDashboard.module.css';
+import layoutStyles from '../../components/layout/MainLayout.module.css';
+import { Sidebar } from '../../components/layout/Sidebar';
 
 interface Props {
     onSelectCompany: (companyId: string) => void;
@@ -17,6 +19,11 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
 
     const [companies, setCompanies] = useState<Company[]>(MockDB.getCompanies());
     const [users, setUsers] = useState<User[]>(MockDB.getUsers());
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const filteredCompanies = companies.filter(c => 
+        c.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const [isAddingCompany, setIsAddingCompany] = useState(false);
     const [newCompanyName, setNewCompanyName] = useState('');
@@ -83,6 +90,11 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         e.preventDefault();
         if (!newUserEmail.trim() || !managingUsersForCompany) return;
 
+        if (!newUserEmail.includes('@')) {
+            alert("Warning: Please enter a valid email address containing an '@' symbol.");
+            return;
+        }
+
         const newUser: User = {
             id: `usr_${uuidv4()}`,
             email: newUserEmail,
@@ -128,9 +140,17 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
     const getCompanyUsers = (companyId: string) => users.filter(u => u.companyId === companyId);
 
     return (
-        <div className={styles.container}>
-            <header className={styles.header}>
-                <div className={styles.headerContent}>
+        <div className={layoutStyles.layout}>
+            <Sidebar 
+                activeTab="admin" 
+                onTabChange={() => {}} 
+                onGoAdmin={() => {}} // already admin
+                onGoHome={() => alert("Please select a company first to view products.")}
+            />
+            <div className={layoutStyles.mainContent} style={{ overflowY: 'auto' }}>
+                <div className={styles.container}>
+                    <header className={styles.header}>
+                        <div className={styles.headerContent}>
                     <div>
                         <h1>Company Dashboard</h1>
                         <p>Welcome back, Super Admin ({user.email})</p>
@@ -144,9 +164,18 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
             <main className={styles.main}>
                 <div className={styles.sectionHeader}>
                     <h2>Client Companies</h2>
-                    <button className={styles.addBtn} onClick={() => setIsAddingCompany(true)}>
-                        <Plus size={16} /> Add Company
-                    </button>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                        <input
+                            type="text"
+                            placeholder="Filter companies..."
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                            style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', outline: 'none', background: 'var(--color-surface)', color: 'var(--color-text)' }}
+                        />
+                        <button className={styles.addBtn} onClick={() => setIsAddingCompany(true)}>
+                            <Plus size={16} /> Add Company
+                        </button>
+                    </div>
                 </div>
 
                 {isAddingCompany && (
@@ -164,7 +193,7 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                 )}
 
                 <div className={styles.companyGrid}>
-                    {companies.map(c => (
+                    {filteredCompanies.map(c => (
                         <div key={c.id} className={styles.companyCard}>
                             <div className={styles.cardTop}>
                                 {editingCompanyId === c.id ? (
@@ -194,7 +223,6 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                                         </div>
                                     </div>
                                 )}
-                                <span className={styles.idBadge}>{c.id}</span>
                             </div>
 
                             <div className={styles.cardActions}>
@@ -262,12 +290,11 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                             ) : (
                                 <form onSubmit={handleAddUser} className={styles.addUserForm}>
                                     <input
-                                        type="email"
+                                        type="text"
                                         value={newUserEmail}
                                         onChange={e => setNewUserEmail(e.target.value)}
                                         placeholder="User Email"
                                         autoFocus
-                                        required
                                     />
                                     <select value={newUserRole} onChange={e => setNewUserRole(e.target.value as any)}>
                                         <option value="admin">Client Admin</option>
@@ -289,6 +316,8 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                     </div>
                 )}
             </main>
+            </div>
+        </div>
         </div>
     );
 }

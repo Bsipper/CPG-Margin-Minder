@@ -15,20 +15,6 @@ function AppContent() {
   const [authMode, setAuthMode] = useState<'none' | 'login' | 'signup'>('none');
   const [activeCompanyId, setActiveCompanyId] = useState<string | null>(null);
   const [activeProductId, setActiveProductId] = useState<string | null>(null);
-  const [hasAutoSelected, setHasAutoSelected] = useState(false);
-
-  useEffect(() => {
-    // Both admin and super_admin should auto-select a product to land on the dashboard
-    if (user && (user.role === 'admin' || user.role === 'super_admin') && !hasAutoSelected) {
-      // For super admin, we can just grab the very first product in the DB to show the dashboard
-      const companyIdToUse = user.role === 'super_admin' ? '' : user.companyId;
-      const userProducts = MockDB.getProducts(companyIdToUse);
-      if (userProducts.length > 0) {
-        setActiveProductId(userProducts[0].id);
-      }
-      setHasAutoSelected(true);
-    }
-  }, [user, hasAutoSelected]);
 
   if (isLoading) {
     return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-background)' }}>Loading...</div>;
@@ -48,16 +34,30 @@ function AppContent() {
     return <TermsOfUse />;
   }
 
-  // If no product is selected, show the Company Portfolio (which now acts as the Client selector for Super Admin)
-  if (!activeProductId) {
-    return <CompanyDashboard onSelectProduct={setActiveProductId} />;
+  // If product is selected, show Product Workspace
+  if (activeProductId) {
+    return (
+      <ScenarioProvider productId={activeProductId}>
+        <MainLayout 
+            onBackToProducts={() => setActiveProductId(null)} 
+            onGoToAdmin={user.role === 'super_admin' ? () => { setActiveProductId(null); setActiveCompanyId(null); } : undefined}
+        />
+      </ScenarioProvider>
+    );
   }
 
-  // Both Super Admin and regular users now use Main Layout
+  // If Super Admin has NOT selected a company, show Super Admin Dashboard
+  if (user.role === 'super_admin' && !activeCompanyId) {
+     return <SuperAdminDashboard onSelectCompany={setActiveCompanyId} />;
+  }
+
+  // Show Company Dashboard (Product List)
   return (
-    <ScenarioProvider productId={activeProductId}>
-      <MainLayout onBackToProducts={() => setActiveProductId(null)} />
-    </ScenarioProvider>
+    <CompanyDashboard 
+        overrideCompanyId={activeCompanyId || user.companyId} 
+        onSelectProduct={setActiveProductId} 
+        onBack={user.role === 'super_admin' ? () => setActiveCompanyId(null) : undefined}
+    />
   );
 }
 

@@ -32,7 +32,7 @@ export class MockDB {
 
     static saveCompany(c: Company) {
         const data = localStorage.getItem('db_companies');
-        let allComps: Company[] = data ? JSON.parse(data) : mockCompanies;
+        let allComps: Company[] = data ? JSON.parse(data) : [...mockCompanies];
         const idx = allComps.findIndex(x => x.id === c.id);
         if (idx >= 0) allComps[idx] = c;
         else allComps.push(c);
@@ -41,14 +41,14 @@ export class MockDB {
 
     static deleteCompany(id: string) {
         const data = localStorage.getItem('db_companies');
-        let allComps: Company[] = data ? JSON.parse(data) : mockCompanies;
+        let allComps: Company[] = data ? JSON.parse(data) : [...mockCompanies];
         allComps = allComps.filter(c => c.id !== id);
         localStorage.setItem('db_companies', JSON.stringify(allComps));
     }
 
     static saveUser(u: User) {
         const data = localStorage.getItem('db_users');
-        let allUsers: User[] = data ? JSON.parse(data) : mockUsers;
+        let allUsers: User[] = data ? JSON.parse(data) : [...mockUsers];
         const idx = allUsers.findIndex(x => x.id === u.id);
         if (idx >= 0) allUsers[idx] = u;
         else allUsers.push(u);
@@ -57,7 +57,7 @@ export class MockDB {
 
     static deleteUser(id: string) {
         const data = localStorage.getItem('db_users');
-        let allUsers: User[] = data ? JSON.parse(data) : mockUsers;
+        let allUsers: User[] = data ? JSON.parse(data) : [...mockUsers];
         allUsers = allUsers.filter(u => u.id !== id);
         localStorage.setItem('db_users', JSON.stringify(allUsers));
     }
@@ -65,12 +65,13 @@ export class MockDB {
     static getProducts(companyId?: string): Product[] {
         const data = localStorage.getItem('db_products');
         const allProds: Product[] = data ? JSON.parse(data) : mockProducts;
-        return companyId ? allProds.filter(p => p.companyId === companyId) : allProds;
+        if (companyId === undefined) return allProds;
+        return allProds.filter(p => p.companyId === companyId);
     }
 
     static saveProduct(p: Product) {
         const data = localStorage.getItem('db_products');
-        let allProds: Product[] = data ? JSON.parse(data) : mockProducts;
+        let allProds: Product[] = data ? JSON.parse(data) : [...mockProducts];
         const idx = allProds.findIndex(x => x.id === p.id);
         if (idx >= 0) allProds[idx] = p;
         else allProds.push(p);
@@ -79,7 +80,7 @@ export class MockDB {
 
     static deleteProduct(id: string) {
         const data = localStorage.getItem('db_products');
-        let allProds: Product[] = data ? JSON.parse(data) : mockProducts;
+        let allProds: Product[] = data ? JSON.parse(data) : [...mockProducts];
         allProds = allProds.filter(p => p.id !== id);
         localStorage.setItem('db_products', JSON.stringify(allProds));
     }

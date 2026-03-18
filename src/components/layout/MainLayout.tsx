@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Dashboard } from '../../features/Dashboard/Dashboard';
 import { ProductSetup } from '../../features/ProductSetup/ProductSetup';
 import { COGSBuilder } from '../../features/COGSBuilder/COGSBuilder';
+import { FreightEngine } from '../../features/FreightEngine/FreightEngine';
 import { PricingEngine } from '../../features/PricingEngine/PricingEngine';
 import { PromotionBuilder } from '../../features/PromotionBuilder/PromotionBuilder';
 import { SlottingFees } from '../../features/SlottingFees/SlottingFees';
@@ -17,8 +18,8 @@ import { SuperAdminDashboard } from '../../features/SuperAdmin/SuperAdminDashboa
 import { Download, LayoutTemplate, ArrowLeft } from 'lucide-react';
 import { exportScenarioToPDF, exportScenarioToCSV } from '../../utils/exportUtils';
 
-export function MainLayout({ onBackToProducts }: { onBackToProducts: () => void }) {
-    const [activeTab, setActiveTab] = useState<TabId>('dashboard');
+export function MainLayout({ onBackToProducts, onGoToAdmin }: { onBackToProducts: () => void, onGoToAdmin?: () => void }) {
+    const [activeTab, setActiveTab] = useState<TabId>('setup');
     const { activeScenario, isPresentationMode } = useScenario();
     const { user } = useAuth();
 
@@ -27,6 +28,7 @@ export function MainLayout({ onBackToProducts }: { onBackToProducts: () => void 
             case 'dashboard': return <Dashboard />;
             case 'setup': return <ProductSetup />;
             case 'cogs': return <COGSBuilder />;
+            case 'freight': return <FreightEngine />;
             case 'pricing': return <PricingEngine />;
             case 'promos': return <PromotionBuilder />;
             case 'slotting': return <SlottingFees />;
@@ -46,6 +48,7 @@ export function MainLayout({ onBackToProducts }: { onBackToProducts: () => void 
             case 'dashboard': return 'Summary Dashboard';
             case 'setup': return 'Product Line Setup';
             case 'cogs': return 'Average COGS';
+            case 'freight': return 'Freight Quotes Calculator';
             case 'pricing': return 'Pricing & Margins';
             case 'promos': return 'Promotion Builder';
             case 'slotting': return 'Slotting Fees & Break-Even ROI';
@@ -57,19 +60,22 @@ export function MainLayout({ onBackToProducts }: { onBackToProducts: () => void 
 
     return (
         <div className={styles.layout}>
-            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
+            <Sidebar activeTab={activeTab} onTabChange={setActiveTab} onGoHome={onBackToProducts} onGoAdmin={onGoToAdmin} />
 
             <main className={styles.mainContent}>
                 <header className={styles.header}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <button className={styles.backBtn} onClick={onBackToProducts} title="Back to Product Lines">
-                            <ArrowLeft size={18} />
-                            <span>Product Lines</span>
-                        </button>
-                        <h1 className={styles.title}>{getTitle()}</h1>
-                        {isPresentationMode && (
-                            <span className={styles.presentationBadge}>Restricted Analytics View</span>
-                        )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ color: 'var(--color-primary)' }}>{activeScenario.product.name}</span>
+                            <span>&bull;</span>
+                            <span>{activeScenario.name}</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <h1 className={styles.title}>{getTitle()}</h1>
+                            {isPresentationMode && (
+                                <span className={styles.presentationBadge}>Restricted Analytics View</span>
+                            )}
+                        </div>
                     </div>
                     <div className={styles.actions}>
                         <button

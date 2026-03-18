@@ -5,14 +5,33 @@ export function calculateEconomics(scenario: Scenario): CalculationResult {
 
     const casePack = product.casePack || 12;
 
-    // 1. Calculate Total COGS
-    let totalCaseCost = 0;
-    if (cogs.inputMethod === 'total') {
-        totalCaseCost = cogs.totalCaseCost || 0;
+    // 1. Calculate Base COGS
+    let baseCaseCost = 0;
+    
+    if (cogs.inputMethod === 'supplier' && product.supplierBaseCost !== undefined && product.supplierBaseCost > 0) {
+        // Driven by Product Line Setup: Supplier Cost + Supplier Margin
+        const marginDec = (product.supplierGrossMargin || 0) / 100;
+        baseCaseCost = marginDec < 1 ? product.supplierBaseCost / (1 - marginDec) : 0;
+    } else if (cogs.inputMethod === 'total') {
+        baseCaseCost = cogs.totalCaseCost || 0;
     } else {
-        totalCaseCost = cogs.lineItems.reduce((acc, item) => acc + (item.cost || 0), 0);
+        baseCaseCost = cogs.lineItems.reduce((acc, item) => acc + (item.cost || 0), 0);
     }
 
+    // Calculate Active Freight Cost
+    let activeFreightCostPerCase = 0;
+    if (scenario.activeFreightQuoteId && scenario.freightQuotes) {
+        const activeQuote = scenario.freightQuotes.find(q => q.id === scenario.activeFreightQuoteId);
+        if (activeQuote && activeQuote.quoteTotal > 0 && activeQuote.pallets) {
+            const casesPerPallet = product.casesPerPallet || 1;
+            const totalCases = activeQuote.pallets * casesPerPallet;
+            if (totalCases > 0) {
+                activeFreightCostPerCase = activeQuote.quoteTotal / totalCases;
+            }
+        }
+    }
+
+    const totalCaseCost = baseCaseCost + activeFreightCostPerCase;
     const cogsPerUnit = totalCaseCost / casePack;
 
     // 2. Base Pricing Calculations (Margins input as e.g. 40 for 40%)
@@ -129,6 +148,8 @@ export function calculateEconomics(scenario: Scenario): CalculationResult {
         base: {
             cogsPerUnit,
             cogsPerCase: totalCaseCost,
+            baseCogsPerCase: baseCaseCost,
+            activeFreightCostPerCase,
             manufacturerSellPriceToDistributor: mfgPriceToDist,
             distributorPriceToRetailer: distPriceToRet,
             retailPricePerCase,

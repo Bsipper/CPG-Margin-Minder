@@ -21,9 +21,20 @@ export interface Product {
     casePack: number;
     sizeOunces?: string;
     category?: string;
+    
+    // Freight & Logistics setup
+    weightPerCase?: number;
+    palletsPerTruckload?: number;
+    casesPerPallet?: number;
+    palletDimensions?: string;
+    freightClass?: string;
+
+    // Supplier Costing
+    supplierBaseCost?: number;
+    supplierGrossMargin?: number;
 }
 
-export type CostInputMethod = 'itemized' | 'total';
+export type CostInputMethod = 'itemized' | 'total' | 'supplier';
 
 export interface COGSItem {
     id: string;
@@ -89,6 +100,18 @@ export interface SlottingFee {
     projectedVolume?: number; // For ROI calc
 }
 
+export interface FreightQuote {
+    id: string;
+    origin: string;
+    destination: string;
+    shipmentType: string; // e.g. '1 Pallet', '5 Pallets', 'Full Truckload'
+    pallets?: number;
+    quoteTotal: number;
+    carrier?: string;
+    transitDays?: number;
+    notes?: string;
+}
+
 export interface Scenario {
     id: string;
     productId: string;
@@ -98,12 +121,16 @@ export interface Scenario {
     margins: Margins;
     promotions: Promotion[];
     slottingFees: SlottingFee[];
+    freightQuotes?: FreightQuote[];
+    activeFreightQuoteId?: string;
     lastModified: number; // timestamp
 }
 
 export interface BasePricingOutputs {
     cogsPerUnit: number;
     cogsPerCase: number;
+    baseCogsPerCase: number;
+    activeFreightCostPerCase: number;
     manufacturerSellPriceToDistributor: number;
     distributorPriceToRetailer: number;
     suggestedRetailPricePerUnit: number;
