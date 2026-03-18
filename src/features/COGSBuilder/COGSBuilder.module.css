@@ -13,39 +13,42 @@
 
 .methodToggle {
     display: flex;
-    background-color: var(--color-background);
-    padding: var(--space-1);
-    border-radius: var(--radius-md);
+    flex-direction: column;
+    gap: var(--space-3);
     margin-bottom: var(--space-6);
-    border: 1px solid var(--color-border);
 }
 
 .toggleBtn {
-    flex: 1;
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-md);
     font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
     transition: all var(--transition-fast);
 }
 
 .toggleBtn:hover {
-    color: var(--color-text-primary);
+    border-color: var(--color-text-muted);
 }
 
 .activeToggle {
-    flex: 1;
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-md);
     font-weight: var(--font-weight-semibold);
     color: var(--color-primary);
     background-color: var(--color-surface-base);
-    box-shadow: var(--shadow-sm);
-    border: none;
-    border-radius: var(--radius-sm);
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    cursor: default;
 }
 
 .totalEntry {

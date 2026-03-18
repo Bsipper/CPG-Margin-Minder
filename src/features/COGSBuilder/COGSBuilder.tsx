@@ -113,29 +113,23 @@ export function COGSBuilder() {
                 />
 
                 <div className={styles.methodToggle}>
-                    <button
-                        className={cogs.inputMethod === 'supplier' ? styles.activeToggle : styles.toggleBtn}
-                        onClick={() => setInputMethod('supplier')}
-                    >
-                        Supplier / Co-Packer Margin
-                    </button>
-                    <button
-                        className={cogs.inputMethod === 'itemized' ? styles.activeToggle : styles.toggleBtn}
-                        onClick={() => setInputMethod('itemized')}
-                    >
-                        Itemized Lines (Detailed)
-                    </button>
-                    <button
-                        className={cogs.inputMethod === 'total' ? styles.activeToggle : styles.toggleBtn}
-                        onClick={() => setInputMethod('total')}
-                    >
-                        Total Case Cost (Simple)
-                    </button>
+                    <label className={cogs.inputMethod === 'supplier' ? styles.activeToggle : styles.toggleBtn}>
+                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'supplier'} onChange={() => setInputMethod('supplier')} />
+                        <span><strong>Supplier / Co-Packer Margin</strong> (Calculate base cost backwards from manufacturer markup)</span>
+                    </label>
+                    <label className={cogs.inputMethod === 'itemized' ? styles.activeToggle : styles.toggleBtn}>
+                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'itemized'} onChange={() => setInputMethod('itemized')} />
+                        <span><strong>Itemized Lines</strong> (Build up bottom-line cost from components)</span>
+                    </label>
+                    <label className={cogs.inputMethod === 'total' ? styles.activeToggle : styles.toggleBtn}>
+                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'total'} onChange={() => setInputMethod('total')} />
+                        <span><strong>Total Case Cost</strong> (Simple override)</span>
+                    </label>
                 </div>
 
                 {cogs.inputMethod === 'supplier' ? (
                     <div className={styles.totalEntry}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', alignItems: 'end' }}>
                             <Input
                                 label="Supplier Cost to Produce (per case)"
                                 type="number"
