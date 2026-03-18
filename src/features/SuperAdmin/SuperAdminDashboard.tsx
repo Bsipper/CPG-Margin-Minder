@@ -36,6 +36,10 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
     const [newUserEmail, setNewUserEmail] = useState('');
     const [newUserRole, setNewUserRole] = useState<'admin' | 'distributor' | 'retailer'>('admin');
 
+    const [confirmDeleteCompany, setConfirmDeleteCompany] = useState<string | null>(null);
+    const [confirmDeleteUser, setConfirmDeleteUser] = useState<string | null>(null);
+    const [userAlertError, setUserAlertError] = useState<string | null>(null);
+
     const handleAddCompany = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newCompanyName.trim()) return;
@@ -53,9 +57,14 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
 
     const handleDeleteCompany = (e: React.MouseEvent, id: string) => {
         e.stopPropagation();
-        if (confirm('Are you sure you want to delete this Company and ALL associated data? This cannot be undone.')) {
-            MockDB.deleteCompany(id);
+        setConfirmDeleteCompany(id);
+    };
+
+    const confirmExecuteDeleteCompany = () => {
+        if (confirmDeleteCompany) {
+            MockDB.deleteCompany(confirmDeleteCompany);
             setCompanies(MockDB.getCompanies());
+            setConfirmDeleteCompany(null);
         }
     };
 
@@ -91,7 +100,7 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         if (!newUserEmail.trim() || !managingUsersForCompany) return;
 
         if (!newUserEmail.includes('@')) {
-            alert("Warning: Please enter a valid email address containing an '@' symbol.");
+            setUserAlertError("Warning: Please enter a valid email address containing an '@' symbol.");
             return;
         }
 
@@ -106,12 +115,18 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         setUsers(MockDB.getUsers());
         setNewUserEmail('');
         setIsAddingUser(false);
+        setUserAlertError(null);
     };
 
     const handleDeleteUser = (id: string) => {
-        if (confirm('Are you sure you want to delete this User?')) {
-            MockDB.deleteUser(id);
+        setConfirmDeleteUser(id);
+    };
+
+    const confirmExecuteDeleteUser = () => {
+        if (confirmDeleteUser) {
+            MockDB.deleteUser(confirmDeleteUser);
             setUsers(MockDB.getUsers());
+            setConfirmDeleteUser(null);
         }
     };
 
@@ -179,17 +194,25 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                 </div>
 
                 {isAddingCompany && (
-                    <form onSubmit={handleAddCompany} className={styles.addForm}>
-                        <input
-                            type="text"
-                            value={newCompanyName}
-                            onChange={e => setNewCompanyName(e.target.value)}
-                            placeholder="E.g., Acme Corp Food Division"
-                            autoFocus
-                        />
-                        <button type="submit" className={styles.saveBtn}>Save</button>
-                        <button type="button" className={styles.cancelBtn} onClick={() => setIsAddingCompany(false)}>Cancel</button>
-                    </form>
+                    <div className={styles.modalOverlay}>
+                        <div className={styles.modal}>
+                            <h2>Add New Company</h2>
+                            <form onSubmit={handleAddCompany} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <input
+                                    type="text"
+                                    value={newCompanyName}
+                                    onChange={e => setNewCompanyName(e.target.value)}
+                                    placeholder="E.g., Acme Corp Food Division"
+                                    autoFocus
+                                    style={{ padding: '8px 12px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', outline: 'none' }}
+                                />
+                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                    <button type="submit" className={styles.saveBtn} style={{ padding: '8px 16px' }}>Save Company</button>
+                                    <button type="button" className={styles.cancelBtn} onClick={() => setIsAddingCompany(false)} style={{ padding: '8px 16px' }}>Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 )}
 
                 <div className={styles.companyGrid}>
@@ -288,21 +311,32 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                                     <Plus size={16} /> Add User
                                 </button>
                             ) : (
-                                <form onSubmit={handleAddUser} className={styles.addUserForm}>
-                                    <input
-                                        type="text"
-                                        value={newUserEmail}
-                                        onChange={e => setNewUserEmail(e.target.value)}
-                                        placeholder="User Email"
-                                        autoFocus
-                                    />
-                                    <select value={newUserRole} onChange={e => setNewUserRole(e.target.value as any)}>
-                                        <option value="admin">Client Admin</option>
-                                        <option value="distributor">Distributor</option>
-                                        <option value="retailer">Retailer</option>
-                                    </select>
-                                    <button type="submit" className={styles.saveBtn}>Save</button>
-                                    <button type="button" className={styles.cancelBtn} onClick={() => setIsAddingUser(false)}>Cancel</button>
+                                <form onSubmit={handleAddUser} className={styles.addUserForm} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <input
+                                            type="text"
+                                            value={newUserEmail}
+                                            onChange={e => {
+                                                setNewUserEmail(e.target.value);
+                                                setUserAlertError(null);
+                                            }}
+                                            placeholder="User Email"
+                                            autoFocus
+                                        />
+                                        <select value={newUserRole} onChange={e => setNewUserRole(e.target.value as any)}>
+                                            <option value="admin">Client Admin</option>
+                                            <option value="distributor">Distributor</option>
+                                            <option value="retailer">Retailer</option>
+                                        </select>
+                                    </div>
+                                    {userAlertError && <div style={{ color: 'var(--color-rose)', fontSize: '0.875rem' }}>{userAlertError}</div>}
+                                    <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                                        <button type="submit" className={styles.saveBtn} style={{ padding: '8px 16px' }}>Save User</button>
+                                        <button type="button" className={styles.cancelBtn} onClick={() => {
+                                            setIsAddingUser(false);
+                                            setUserAlertError(null);
+                                        }} style={{ padding: '8px 16px' }}>Cancel</button>
+                                    </div>
                                 </form>
                             )}
 
@@ -312,6 +346,33 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
                             }}>
                                 Close
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* Modals for Custom Confirmation (bypassing native browser suppression) */}
+                {confirmDeleteCompany && (
+                    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+                        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px' }}>
+                            <h2 style={{ marginTop: 0, color: 'white' }}>Delete Company?</h2>
+                            <p style={{ color: 'var(--color-text-secondary)', margin: '1rem 0' }}>Are you sure you want to delete this Company and ALL associated data? This cannot be undone.</p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={confirmExecuteDeleteCompany} style={{ padding: '8px 16px', background: 'var(--color-rose)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Delete Company</button>
+                                <button onClick={() => setConfirmDeleteCompany(null)} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'white', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {confirmDeleteUser && (
+                    <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+                        <div style={{ background: 'var(--color-surface)', padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px' }}>
+                            <h2 style={{ marginTop: 0, color: 'white' }}>Delete User?</h2>
+                            <p style={{ color: 'var(--color-text-secondary)', margin: '1rem 0' }}>Are you sure you want to delete this User?</p>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button onClick={confirmExecuteDeleteUser} style={{ padding: '8px 16px', background: 'var(--color-rose)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Delete User</button>
+                                <button onClick={() => setConfirmDeleteUser(null)} style={{ padding: '8px 16px', background: 'transparent', border: '1px solid var(--color-border)', color: 'white', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>Cancel</button>
+                            </div>
                         </div>
                     </div>
                 )}
