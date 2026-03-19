@@ -1,8 +1,10 @@
 import express from 'express';
 import cors from 'cors';
-import { Pool } from 'pg';
+import pg from 'pg';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+const { Pool } = pg;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,10 +17,14 @@ app.use(express.json());
 app.use(cors());
 
 // Initialize PostgreSQL connection
-// Railway automatically provides the DATABASE_URL environment variable when a Postgres database is linked
+// Railway provides DATABASE_URL. If it's an internal URL (.internal), it doesn't support SSL.
+const usesInternalRailwayNetwork = process.env.DATABASE_URL?.includes('.internal');
+
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    ssl: process.env.NODE_ENV === 'production' && !usesInternalRailwayNetwork 
+        ? { rejectUnauthorized: false } 
+        : false
 });
 
 // API Routes
