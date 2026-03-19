@@ -27,6 +27,11 @@ const pool = new Pool({
         : false
 });
 
+// Catch any idle database connection errors to prevent the entire Node process from crashing
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+});
+
 // API Routes
 app.get('/api/health', async (req, res) => {
     try {
@@ -209,9 +214,9 @@ app.delete('/api/products/:id', async (req, res) => {
 
 // Serve the Vite React app in production
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../dist')));
+    app.use(express.static(path.join(__dirname, 'dist')));
     app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../dist', 'index.html'));
+        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
     });
 }
 
