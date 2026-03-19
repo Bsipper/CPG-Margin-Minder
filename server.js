@@ -156,7 +156,7 @@ app.delete('/api/users/:id', async (req, res) => {
 });
 
 // Products
-app.get('/api/products/:companyId?', async (req, res) => {
+app.get(['/api/products', '/api/products/:companyId'], async (req, res) => {
     try {
         const { companyId } = req.params;
         let query = 'SELECT * FROM products ORDER BY created_at DESC';
