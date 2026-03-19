@@ -51,9 +51,9 @@ export function Sidebar({ activeTab, onTabChange, onGoHome, onGoAdmin }: Sidebar
                         <button
                             key={item.id}
                             onClick={() => {
+                                onTabChange(item.id as TabId);
                                 if (item.id === 'home' && onGoHome) onGoHome();
                                 else if (item.id === 'admin' && onGoAdmin) onGoAdmin();
-                                else onTabChange(item.id as TabId);
                             }}
                             className={`${styles.navItem} ${isActive ? styles.navItemActive : ''} ${item.id === 'admin' ? styles.navItemAdmin : ''}`}
                             style={item.id === 'home' ? { marginBottom: '1rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1.5rem', fontWeight: 600 } : {}}

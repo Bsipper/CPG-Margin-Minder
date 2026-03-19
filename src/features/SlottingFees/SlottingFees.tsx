@@ -34,11 +34,13 @@ export function SlottingFees() {
 
     const mfgWholesalePrice = results?.base?.manufacturerSellPriceToDistributor || 0;
     const distPriceToRetailer = results?.base?.distributorPriceToRetailer || 0;
+    const cogsPerCase = results?.base?.cogsPerCase || 0;
 
     const calculateFeeTotal = (fee: any) => {
         const flat = fee.totalAmount || 0;
         const numSkus = fee.numberOfSkus || 1; // Default to 1 to prevent multiplying by 0 incorrectly if undefined
-        const freeCasesCost = numSkus * (fee.freeCasesPerStore || 0) * (fee.numberOfStores || 0) * distPriceToRetailer;
+        // Priority D: Free fill valuation should use COGS, not retail/distributor price
+        const freeCasesCost = numSkus * (fee.freeCasesPerStore || 0) * (fee.numberOfStores || 0) * cogsPerCase;
         return flat + freeCasesCost;
     };
 
@@ -130,7 +132,7 @@ export function SlottingFees() {
                                         <div className={styles.freeFillCosts} style={{ marginTop: '1rem', background: 'var(--color-surface-base)', padding: '0.75rem', borderRadius: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>Cost Per Store:</span>
                                             <strong style={{ color: 'var(--color-text-main)', fontSize: '1.125rem' }}>
-                                                {fmtCurrency((fee.numberOfSkus || 1) * (fee.freeCasesPerStore || 0) * distPriceToRetailer)}
+                                                {fmtCurrency((fee.numberOfSkus || 1) * (fee.freeCasesPerStore || 0) * cogsPerCase)}
                                             </strong>
                                         </div>
                                     </div>

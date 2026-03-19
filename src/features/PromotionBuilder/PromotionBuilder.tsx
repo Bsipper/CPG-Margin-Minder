@@ -140,8 +140,11 @@ export function PromotionBuilder() {
                                         <div className={styles.fieldGroup}>
                                             <label className={styles.label}>Type</label>
                                             <select
-                                                value={promo.type}
-                                                onChange={(e) => updatePromo(promo.id, 'type', e.target.value as PromoType)}
+                                                value={promo.type || 'tpr'}
+                                                onChange={(e) => {
+                                                    const val = e.currentTarget.value;
+                                                    updatePromo(promo.id, 'type', val);
+                                                }}
                                                 className={styles.select}
                                             >
                                                 {promoTypes.map(pt => (
@@ -260,8 +263,9 @@ export function PromotionBuilder() {
                                             const marginPercent = totalRevenue > 0 ? (profitWithPromo / totalRevenue) * 100 : 0;
 
                                             const totalInvestment = (promoCost * totalCases);
-                                            const roiPercent = totalInvestment > 0 ? (incrementalProfit / totalInvestment) * 100 : (incrementalProfit > 0 ? 100 : 0);
-                                            return { profitWithPromo, incrementalProfit, isProfitable, roiPercent, marginPercent };
+                                            // Priority C: ROI fix - don't mathematically hardcode 100 when divided by 0
+                                            const roiPercent = totalInvestment > 0 ? (incrementalProfit / totalInvestment) * 100 : 0;
+                                            return { profitWithPromo, incrementalProfit, isProfitable, roiPercent, marginPercent, totalInvestment };
                                         };
 
                                         const mfg = calcTierROI(results.profitability.manufacturerContributionMarginDollars, out.manufacturerNetPromoCostDollars, results.base.manufacturerSellPriceToDistributor);
@@ -319,8 +323,8 @@ export function PromotionBuilder() {
                                                         </div>
                                                         <div className={styles.roiMetric}>
                                                             <span>ROI</span>
-                                                            <strong className={data.roiPercent >= 0 ? styles.positiveText : styles.negativeText}>
-                                                                {data.roiPercent > 0 ? '+' : ''}{data.roiPercent.toFixed(1)}%
+                                                            <strong className={data.totalInvestment === 0 ? undefined : (data.roiPercent >= 0 ? styles.positiveText : styles.negativeText)}>
+                                                                {data.totalInvestment === 0 ? 'N/A' : `${data.roiPercent > 0 ? '+' : ''}${data.roiPercent.toFixed(1)}%`}
                                                             </strong>
                                                         </div>
                                                     </div>

@@ -57,8 +57,9 @@ export function ScenarioComparison() {
 
                     <div className={styles.sectionTitle}>Profitability ($ / Case)</div>
                     <div className={styles.cell}>Mfg Gross Profit</div>
+                    <div className={styles.cell}>Pre-Promo Cont. Margin</div>
                     <div className={styles.cell}>Trade/Promo Expense</div>
-                    <div className={styles.cellRowHighlight}>Contribution Margin</div>
+                    <div className={styles.cellRowHighlight}>Post-Promo Margin</div>
                 </div>
 
                 {/* Data Columns */}
@@ -96,9 +97,10 @@ export function ScenarioComparison() {
 
                             <div className={styles.sectionPlaceholder} />
                             <div className={styles.cell}>{isPresentationMode ? '***' : fmtCurrency(res.profitability.manufacturerGrossProfitDollars)}</div>
+                            <div className={styles.cell}>{isPresentationMode ? '***' : fmtCurrency(res.profitability.manufacturerContributionMarginDollars)}</div>
                             <div className={styles.cell}>{fmtCurrency(res.aggregatePostPromo?.promoCostPerCase || 0)}</div>
                             <div className={styles.cellContentHighlight}>
-                                {isPresentationMode ? '***' : fmtCurrency(res.profitability.manufacturerContributionMarginDollars)}
+                                {isPresentationMode ? '***' : fmtCurrency(res.aggregatePostPromo?.postPromoManufacturerContributionMarginDollars ?? res.profitability.manufacturerContributionMarginDollars)}
                             </div>
                         </div>
                     );

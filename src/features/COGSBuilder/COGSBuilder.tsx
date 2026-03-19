@@ -113,16 +113,16 @@ export function COGSBuilder() {
                 />
 
                 <div className={styles.methodToggle}>
-                    <label className={cogs.inputMethod === 'supplier' ? styles.activeToggle : styles.toggleBtn}>
-                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'supplier'} onChange={() => setInputMethod('supplier')} />
+                    <label className={cogs.inputMethod === 'supplier' ? styles.activeToggle : styles.toggleBtn} onClick={() => setInputMethod('supplier')}>
+                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'supplier'} readOnly />
                         <span><strong>Supplier / Co-Packer Margin</strong> (Calculate base cost backwards from manufacturer markup)</span>
                     </label>
-                    <label className={cogs.inputMethod === 'itemized' ? styles.activeToggle : styles.toggleBtn}>
-                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'itemized'} onChange={() => setInputMethod('itemized')} />
+                    <label className={cogs.inputMethod === 'itemized' ? styles.activeToggle : styles.toggleBtn} onClick={() => setInputMethod('itemized')}>
+                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'itemized'} readOnly />
                         <span><strong>Itemized Lines</strong> (Build up bottom-line cost from components)</span>
                     </label>
-                    <label className={cogs.inputMethod === 'total' ? styles.activeToggle : styles.toggleBtn}>
-                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'total'} onChange={() => setInputMethod('total')} />
+                    <label className={cogs.inputMethod === 'total' ? styles.activeToggle : styles.toggleBtn} onClick={() => setInputMethod('total')}>
+                        <input type="radio" name="cogsMethod" checked={cogs.inputMethod === 'total'} readOnly />
                         <span><strong>Total Case Cost</strong> (Simple override)</span>
                     </label>
                 </div>
@@ -149,7 +149,7 @@ export function COGSBuilder() {
                                 suffix="%"
                                 value={product.supplierGrossMargin === undefined ? '' : product.supplierGrossMargin}
                                 onChange={(e) => updateActiveScenario(prev => ({ ...prev, product: { ...prev.product, supplierGrossMargin: parseFloat(e.target.value) || 0 } }))}
-                                helperText="Margin supplier takes on top"
+                                helperText="Calculated inversely as: Cost ÷ (1 - Margin %)"
                             />
                         </div>
 

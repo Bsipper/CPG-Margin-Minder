@@ -50,8 +50,13 @@ export function Dashboard() {
     });
 
     const grandTotalInvestment = totalSlottingDollars + totalPromoDollars;
-    const averageInvestmentPerCase = totalPromoVolume > 0 ? (grandTotalInvestment / totalPromoVolume) : 0;
-    const totalGrossRevenue = totalPromoVolume * mfgWholesalePrice;
+    
+    // Priority A: Use projected annual volume from Slotting Fees as the primary denominator
+    const totalProjectedVolume = (activeScenario.slottingFees || []).reduce((sum, f) => sum + (f.projectedVolume || 0), 0);
+    const volumeForInvestment = totalProjectedVolume > 0 ? totalProjectedVolume : totalPromoVolume;
+    
+    const averageInvestmentPerCase = volumeForInvestment > 0 ? (grandTotalInvestment / volumeForInvestment) : 0;
+    const totalGrossRevenue = volumeForInvestment * mfgWholesalePrice;
     const investmentPercentOfRevenue = totalGrossRevenue > 0 ? (grandTotalInvestment / totalGrossRevenue) : 0;
 
     const marginSplitData = [

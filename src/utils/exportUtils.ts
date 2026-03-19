@@ -32,7 +32,7 @@ export function exportScenarioToPDF(scenario: Scenario) {
     // Pricing & Margins Table
     autoTable(doc, {
         startY: (doc as any).lastAutoTable.finalY + 10,
-        head: [['Tier', 'Margin %', 'Gross Profit ($/Case)', 'Sell Price ($/Case)']],
+        head: [['Tier', 'Target Margin %', 'Gross Profit ($/Case)', 'Sell Price ($/Case)']],
         body: [
             ['Manufacturer', fmtPct(res.profitability.manufacturerGrossMarginPercent), fmtCurrency(res.profitability.manufacturerGrossProfitDollars), fmtCurrency(res.base.manufacturerSellPriceToDistributor)],
             ['Distributor', fmtPct(res.profitability.distributorMarginPercent), fmtCurrency(res.profitability.distributorGrossProfitDollars), fmtCurrency(res.base.distributorPriceToRetailer)],
@@ -42,8 +42,44 @@ export function exportScenarioToPDF(scenario: Scenario) {
         headStyles: { fillColor: [79, 70, 229] }
     });
 
+    autoTable(doc, {
+        startY: (doc as any).lastAutoTable.finalY + 10,
+        head: [['Manufacturer Deductions', 'Amount ($/Case)']],
+        body: [
+            ['Freight Allowance', fmtCurrency(res.base.manufacturerSellPriceToDistributor * (scenario.margins.freightAllowance / 100))],
+            ['Trade Spend', fmtCurrency(res.base.manufacturerSellPriceToDistributor * (scenario.margins.tradeSpend / 100))],
+            ['Broker Fee', fmtCurrency(res.base.manufacturerSellPriceToDistributor * (scenario.margins.brokerFee / 100))],
+            ['Pre-Promo Contribution Margin', fmtCurrency(res.profitability.manufacturerContributionMarginDollars)]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [100, 116, 139] }
+    });
+
+    if (scenario.promotions.length > 0) {
+        autoTable(doc, {
+            startY: (doc as any).lastAutoTable.finalY + 10,
+            head: [['Promotions', 'Cost Per Case', 'Mfg Funded', 'Dist Funded']],
+            body: scenario.promotions.map(p => {
+                const out = res.promotions[p.id];
+                return [p.name || 'Promo', fmtCurrency(out?.promoCostPerCase || 0), fmtCurrency(out?.manufacturerNetPromoCostDollars || 0), fmtCurrency(out?.distributorNetPromoCostDollars || 0)];
+            }),
+            theme: 'grid',
+            headStyles: { fillColor: [245, 158, 11] }
+        });
+        
+        autoTable(doc, {
+            startY: (doc as any).lastAutoTable.finalY + 5,
+            head: [['Post-Promo Cont. Margin', 'Amount ($/Case)']],
+            body: [
+                ['Total Aggregate Impact', fmtCurrency(res.aggregatePostPromo?.postPromoManufacturerContributionMarginDollars ?? 0)]
+            ],
+            theme: 'grid',
+            headStyles: { fillColor: [22, 163, 74] }
+        });
+    }
+
     // Save PDF
-    doc.save(`${scenario.product.name.replace(/\\s+/g, '_')}_Margin_Report.pdf`);
+    doc.save(`${scenario.product.name.replace(/\s+/g, '_')}_Margin_Report.pdf`);
 }
 
 export function exportScenarioToCSV(scenario: Scenario) {
@@ -68,14 +104,28 @@ export function exportScenarioToCSV(scenario: Scenario) {
         ['Total Promo Cost (Case)', (res.aggregatePostPromo?.promoCostPerCase || 0).toFixed(2), '$'],
     ];
 
-    const csvContent = rows.map(e => e.join(",")).join("\\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const escapeCSV = (value: string | number) => {
+        const str = String(value);
+        if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+            return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+    };
+
+    const csvContent = rows.map(r => r.map(escapeCSV).join(",")).join("\n");
+    // Priority E Bug 1: Enforce \uFEFF BOM to ensure Excel triggers UTF-8 download explicitly, preventing 0 bytes or rendering failures
+    const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `${scenario.product.name.replace(/\\s+/g, '_')}_Economics.csv`);
+    // Explicit attribute assignment for broader browser compatibility
+    link.href = url;
+    link.download = `${scenario.product.name.replace(/\s+/g, '_')}_Economics.csv`;
+    link.style.display = 'none';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }, 100);
 }
