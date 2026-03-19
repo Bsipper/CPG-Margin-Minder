@@ -210,6 +210,35 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
+// Temporary Seed Route
+app.get('/api/seed-mock', async (req, res) => {
+    try {
+        await pool.query('BEGIN');
+        
+        // Companies
+        await pool.query("INSERT INTO companies (id, name) VALUES ('comp_1', 'Sipper Natural Foods') ON CONFLICT DO NOTHING");
+        await pool.query("INSERT INTO companies (id, name) VALUES ('comp_2', 'Demo Distributors LLC') ON CONFLICT DO NOTHING");
+
+        // Users
+        await pool.query("INSERT INTO users (id, email, role, company_id, has_accepted_terms) VALUES ('usr_sa1', 'Bill@cascadiafoodbev.com', 'super_admin', 'comp_sys', false) ON CONFLICT DO NOTHING");
+        await pool.query("INSERT INTO users (id, email, role, company_id, has_accepted_terms) VALUES ('usr_sa2', 'adrian@marginminder.com', 'super_admin', 'comp_sys', false) ON CONFLICT DO NOTHING");
+        await pool.query("INSERT INTO users (id, email, role, company_id, has_accepted_terms) VALUES ('usr_admin', 'admin@sipper.com', 'admin', 'comp_1', false) ON CONFLICT DO NOTHING");
+        await pool.query("INSERT INTO users (id, email, role, company_id, has_accepted_terms) VALUES ('usr_dist', 'distributor@demo.com', 'distributor', 'comp_2', false) ON CONFLICT DO NOTHING");
+        await pool.query("INSERT INTO users (id, email, role, company_id, has_accepted_terms) VALUES ('usr_ret', 'buyer@retailer.com', 'retailer', 'comp_1', false) ON CONFLICT DO NOTHING");
+
+        // Products
+        await pool.query("INSERT INTO products (id, company_id, name, sku, case_pack, size_ounces) VALUES ('prod_1', 'comp_1', 'Original Walnuts', 'WAL-100', 12, '8oz') ON CONFLICT DO NOTHING");
+        await pool.query("INSERT INTO products (id, company_id, name, sku, case_pack, size_ounces) VALUES ('prod_2', 'comp_1', 'Roasted Peanuts', 'PEA-200', 24, '16oz') ON CONFLICT DO NOTHING");
+
+        await pool.query('COMMIT');
+        res.send("<h1>Database successfully seeded with old mock data!</h1><p>You can now log in and see your companies.</p>");
+    } catch (err) {
+        await pool.query('ROLLBACK');
+        console.error(err);
+        res.status(500).send("Seeding failed: " + err.message);
+    }
+});
+
 // --- END API ROUTES ---
 
 // Serve the Vite React app in production
