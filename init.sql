@@ -1,0 +1,25 @@
+-- Use this to easily initialize your new Railway PostgreSQL database
+CREATE TABLE IF NOT EXISTS companies (
+    id VARCHAR(255) PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    role VARCHAR(50) NOT NULL,
+    company_id VARCHAR(255) NOT NULL,
+    has_accepted_terms BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS products (
+    id VARCHAR(255) PRIMARY KEY,
+    company_id VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    sku VARCHAR(255) NOT NULL,
+    case_pack INTEGER NOT NULL,
+    size_ounces VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

@@ -17,9 +17,19 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
 
     if (!user || user.role !== 'super_admin') return null;
 
-    const [companies, setCompanies] = useState<Company[]>(MockDB.getCompanies());
-    const [users, setUsers] = useState<User[]>(MockDB.getUsers());
+    const [companies, setCompanies] = useState<Company[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+
+    React.useEffect(() => {
+        const loadData = async () => {
+            const fetchedComps = await MockDB.getCompanies();
+            const fetchedUsers = await MockDB.getUsers();
+            setCompanies(fetchedComps);
+            setUsers(fetchedUsers);
+        };
+        loadData();
+    }, []);
 
     const filteredCompanies = companies.filter(c => 
         c.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -40,7 +50,7 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
     const [confirmDeleteUser, setConfirmDeleteUser] = useState<string | null>(null);
     const [userAlertError, setUserAlertError] = useState<string | null>(null);
 
-    const handleAddCompany = (e: React.FormEvent) => {
+    const handleAddCompany = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newCompanyName.trim()) return;
 
@@ -49,8 +59,9 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
             name: newCompanyName
         };
 
-        MockDB.saveCompany(newComp);
-        setCompanies(MockDB.getCompanies());
+        await MockDB.saveCompany(newComp);
+        const fetchedComps = await MockDB.getCompanies();
+        setCompanies(fetchedComps);
         setNewCompanyName('');
         setIsAddingCompany(false);
     };
@@ -60,10 +71,11 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         setConfirmDeleteCompany(id);
     };
 
-    const confirmExecuteDeleteCompany = () => {
+    const confirmExecuteDeleteCompany = async () => {
         if (confirmDeleteCompany) {
-            MockDB.deleteCompany(confirmDeleteCompany);
-            setCompanies(MockDB.getCompanies());
+            await MockDB.deleteCompany(confirmDeleteCompany);
+            const fetchedComps = await MockDB.getCompanies();
+            setCompanies(fetchedComps);
             setConfirmDeleteCompany(null);
         }
     };
@@ -74,13 +86,14 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         setEditCompanyName(c.name);
     };
 
-    const saveEditCompany = (e: React.MouseEvent, c: Company) => {
+    const saveEditCompany = async (e: React.MouseEvent, c: Company) => {
         e.stopPropagation();
         if (!editCompanyName.trim()) return;
 
         const updated = { ...c, name: editCompanyName };
-        MockDB.saveCompany(updated);
-        setCompanies(MockDB.getCompanies());
+        await MockDB.saveCompany(updated);
+        const fetchedComps = await MockDB.getCompanies();
+        setCompanies(fetchedComps);
         setEditingCompanyId(null);
         setEditCompanyName('');
     };
@@ -95,7 +108,7 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
     const [editUserEmail, setEditUserEmail] = useState('');
     const [editUserRole, setEditUserRole] = useState<'admin' | 'distributor' | 'retailer'>('admin');
 
-    const handleAddUser = (e: React.FormEvent) => {
+    const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newUserEmail.trim() || !managingUsersForCompany) return;
 
@@ -111,8 +124,9 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
             companyId: managingUsersForCompany
         };
 
-        MockDB.saveUser(newUser);
-        setUsers(MockDB.getUsers());
+        await MockDB.saveUser(newUser);
+        const updatedUsers = await MockDB.getUsers();
+        setUsers(updatedUsers);
         setNewUserEmail('');
         setIsAddingUser(false);
         setUserAlertError(null);
@@ -122,10 +136,11 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         setConfirmDeleteUser(id);
     };
 
-    const confirmExecuteDeleteUser = () => {
+    const confirmExecuteDeleteUser = async () => {
         if (confirmDeleteUser) {
-            MockDB.deleteUser(confirmDeleteUser);
-            setUsers(MockDB.getUsers());
+            await MockDB.deleteUser(confirmDeleteUser);
+            const updatedUsers = await MockDB.getUsers();
+            setUsers(updatedUsers);
             setConfirmDeleteUser(null);
         }
     };
@@ -136,14 +151,15 @@ export function SuperAdminDashboard({ onSelectCompany }: Props) {
         setEditUserRole(u.role as 'admin' | 'distributor' | 'retailer');
     };
 
-    const saveEditUser = () => {
+    const saveEditUser = async () => {
         if (!editUserEmail.trim()) return;
 
         const targetUser = users.find(x => x.id === editingUserId);
         if (targetUser) {
             const updated = { ...targetUser, email: editUserEmail, role: editUserRole };
-            MockDB.saveUser(updated);
-            setUsers(MockDB.getUsers());
+            await MockDB.saveUser(updated);
+            const updatedUsers = await MockDB.getUsers();
+            setUsers(updatedUsers);
         }
         setEditingUserId(null);
     };

@@ -35,17 +35,18 @@ export function ScenarioProvider({ children, productId }: { children: ReactNode,
 
     // Initialize default scenario if empty
     useEffect(() => {
-        if (scenarios.length === 0) {
-            // Find the product to build the default scenario securely
-            const allowedCompanyId = user?.role === 'super_admin' ? undefined : user?.companyId;
-            const allProducts = MockDB.getProducts(allowedCompanyId); 
-            const existingProductDef = allProducts.find(p => p.id === productId);
+        const initDefaultScenario = async () => {
+            if (scenarios.length === 0) {
+                // Find the product to build the default scenario securely
+                const allowedCompanyId = user?.role === 'super_admin' ? undefined : user?.companyId;
+                const allProducts = await MockDB.getProducts(allowedCompanyId); 
+                const existingProductDef = allProducts.find(p => p.id === productId);
 
-            if (!existingProductDef) {
-                console.error("Security Block: Unauthorized access to a product outside the user's company bounds.");
-                // Return early, don't initialize a scenario for a product they don't own.
-                return;
-            }
+                if (!existingProductDef) {
+                    console.error("Security Block: Unauthorized access to a product outside the user's company bounds.");
+                    // Return early, don't initialize a scenario for a product they don't own.
+                    return;
+                }
 
             const defaultScen: Scenario = {
                 id: uuidv4(),
@@ -71,10 +72,12 @@ export function ScenarioProvider({ children, productId }: { children: ReactNode,
                 lastModified: Date.now()
             };
 
-            setScenarios([defaultScen]);
-            setActiveScenarioId(defaultScen.id);
-        }
-    }, [scenarios.length, productId, setScenarios, setActiveScenarioId]);
+                setScenarios([defaultScen]);
+                setActiveScenarioId(defaultScen.id);
+            }
+        };
+        initDefaultScenario();
+    }, [scenarios.length, productId, setScenarios, setActiveScenarioId, user]);
 
     const activeScenario = useMemo(() => {
         return scenarios.find(s => s.id === activeScenarioId) || scenarios[0];
@@ -85,7 +88,7 @@ export function ScenarioProvider({ children, productId }: { children: ReactNode,
         return calculateEconomics(activeScenario);
     }, [activeScenario]);
 
-    const saveScenario = (scenario: Scenario) => {
+    const saveScenario = async (scenario: Scenario) => {
         setScenarios(prev => {
             const exists = prev.find(s => s.id === scenario.id);
             if (exists) {
@@ -96,7 +99,7 @@ export function ScenarioProvider({ children, productId }: { children: ReactNode,
         
         // Keep the database Product definition fully synced with the Scenario Product Setup
         if (scenario.product) {
-            MockDB.saveProduct(scenario.product);
+            await MockDB.saveProduct(scenario.product);
         }
     };
 

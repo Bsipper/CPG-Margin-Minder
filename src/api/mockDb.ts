@@ -1,87 +1,60 @@
 import { Company, User, Product, Scenario } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-export const mockCompanies: Company[] = [
-    { id: 'comp_1', name: 'Sipper Natural Foods' },
-    { id: 'comp_2', name: 'Demo Distributors LLC' }
-];
-
-export const mockUsers: User[] = [
-    { id: 'usr_sa1', email: 'Bill@cascadiafoodbev.com', role: 'super_admin', companyId: 'comp_sys', hasAcceptedTerms: false },
-    { id: 'usr_sa2', email: 'adrian@marginminder.com', role: 'super_admin', companyId: 'comp_sys', hasAcceptedTerms: false },
-    { id: 'usr_admin', email: 'admin@sipper.com', role: 'admin', companyId: 'comp_1', hasAcceptedTerms: false },
-    { id: 'usr_dist', email: 'distributor@demo.com', role: 'distributor', companyId: 'comp_2', hasAcceptedTerms: false },
-    { id: 'usr_ret', email: 'buyer@retailer.com', role: 'retailer', companyId: 'comp_1', hasAcceptedTerms: false } // Shared access for viewing
-];
-
-export const mockProducts: Product[] = [
-    { id: 'prod_1', companyId: 'comp_1', name: 'Original Walnuts', sku: 'WAL-100', casePack: 12, sizeOunces: '8oz' },
-    { id: 'prod_2', companyId: 'comp_1', name: 'Roasted Peanuts', sku: 'PEA-200', casePack: 24, sizeOunces: '16oz' },
-];
-
 export class MockDB {
-    static getCompanies(): Company[] {
-        const data = localStorage.getItem('db_companies');
-        return data ? JSON.parse(data) : mockCompanies;
+    static async getCompanies(): Promise<Company[]> {
+        const res = await fetch('/api/companies');
+        if (!res.ok) return [];
+        return await res.json();
     }
 
-    static getUsers(): User[] {
-        const data = localStorage.getItem('db_users');
-        return data ? JSON.parse(data) : mockUsers;
+    static async getUsers(): Promise<User[]> {
+        const res = await fetch('/api/users');
+        if (!res.ok) return [];
+        return await res.json();
     }
 
-    static saveCompany(c: Company) {
-        const data = localStorage.getItem('db_companies');
-        let allComps: Company[] = data ? JSON.parse(data) : [...mockCompanies];
-        const idx = allComps.findIndex(x => x.id === c.id);
-        if (idx >= 0) allComps[idx] = c;
-        else allComps.push(c);
-        localStorage.setItem('db_companies', JSON.stringify(allComps));
+    static async saveCompany(c: Company): Promise<void> {
+        await fetch('/api/companies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(c)
+        });
     }
 
-    static deleteCompany(id: string) {
-        const data = localStorage.getItem('db_companies');
-        let allComps: Company[] = data ? JSON.parse(data) : [...mockCompanies];
-        allComps = allComps.filter(c => c.id !== id);
-        localStorage.setItem('db_companies', JSON.stringify(allComps));
+    static async deleteCompany(id: string): Promise<void> {
+        await fetch(`/api/companies/${id}`, { method: 'DELETE' });
     }
 
-    static saveUser(u: User) {
-        const data = localStorage.getItem('db_users');
-        let allUsers: User[] = data ? JSON.parse(data) : [...mockUsers];
-        const idx = allUsers.findIndex(x => x.id === u.id);
-        if (idx >= 0) allUsers[idx] = u;
-        else allUsers.push(u);
-        localStorage.setItem('db_users', JSON.stringify(allUsers));
+    static async saveUser(u: User): Promise<void> {
+        await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(u)
+        });
     }
 
-    static deleteUser(id: string) {
-        const data = localStorage.getItem('db_users');
-        let allUsers: User[] = data ? JSON.parse(data) : [...mockUsers];
-        allUsers = allUsers.filter(u => u.id !== id);
-        localStorage.setItem('db_users', JSON.stringify(allUsers));
+    static async deleteUser(id: string): Promise<void> {
+        await fetch(`/api/users/${id}`, { method: 'DELETE' });
     }
 
-    static getProducts(companyId?: string): Product[] {
-        const data = localStorage.getItem('db_products');
-        const allProds: Product[] = data ? JSON.parse(data) : mockProducts;
-        if (companyId === undefined) return allProds;
-        return allProds.filter(p => p.companyId === companyId);
+    static async getProducts(companyId?: string): Promise<Product[]> {
+        const url = companyId ? `/api/products/${companyId}` : '/api/products';
+        const res = await fetch(url);
+        if (!res.ok) return [];
+        return await res.json();
     }
 
-    static saveProduct(p: Product) {
-        const data = localStorage.getItem('db_products');
-        let allProds: Product[] = data ? JSON.parse(data) : [...mockProducts];
-        const idx = allProds.findIndex(x => x.id === p.id);
-        if (idx >= 0) allProds[idx] = p;
-        else allProds.push(p);
-        localStorage.setItem('db_products', JSON.stringify(allProds));
+    static async saveProduct(p: Product): Promise<void> {
+        await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(p)
+        });
     }
 
-    static deleteProduct(id: string) {
-        const data = localStorage.getItem('db_products');
-        let allProds: Product[] = data ? JSON.parse(data) : [...mockProducts];
-        allProds = allProds.filter(p => p.id !== id);
-        localStorage.setItem('db_products', JSON.stringify(allProds));
+    static async deleteProduct(id: string): Promise<void> {
+        await fetch(`/api/products/${id}`, { method: 'DELETE' });
     }
 }
+

@@ -8,15 +8,20 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "serve -s dist"
+    "start": "node server.js",
+    "server": "node server.js"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",
     "clsx": "^2.1.1",
+    "cors": "^2.8.6",
     "dompurify": "^3.3.3",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.577.0",
+    "pg": "^8.20.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "recharts": "^3.8.0",
@@ -34,6 +39,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "nodemon": "^3.1.14",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1"

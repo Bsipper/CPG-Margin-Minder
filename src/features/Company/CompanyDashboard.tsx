@@ -19,7 +19,7 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
     const targetCompanyId = overrideCompanyId || user?.companyId || '';
 
     // Product State
-    const [products, setProducts] = useState<Product[]>(MockDB.getProducts(targetCompanyId));
+    const [products, setProducts] = useState<Product[]>([]);
     const [isAddingProduct, setIsAddingProduct] = useState(false);
     const [newProductName, setNewProductName] = useState('');
     const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -27,11 +27,23 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
 
     // User State (Only for Admins)
     const canManageProducts = user?.role === 'admin' || user?.role === 'super_admin';
-    const canManageUsers = user?.role === 'admin'; // Super admins manage users in their own dashboard
+    const canManageUsers = user?.role === 'admin';
 
-    const [companyUsers, setCompanyUsers] = useState<User[]>(
-        MockDB.getUsers().filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin')
-    );
+    const [companyUsers, setCompanyUsers] = useState<User[]>([]);
+
+    React.useEffect(() => {
+        const loadData = async () => {
+            if (!targetCompanyId) return;
+            const fetchedProducts = await MockDB.getProducts(targetCompanyId);
+            setProducts(fetchedProducts);
+
+            if (canManageUsers) {
+                const fetchedUsers = await MockDB.getUsers();
+                setCompanyUsers(fetchedUsers.filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
+            }
+        };
+        loadData();
+    }, [targetCompanyId, canManageUsers]);
     const [isAddingUser, setIsAddingUser] = useState(false);
     const [newUserEmail, setNewUserEmail] = useState('');
     const [newUserRole, setNewUserRole] = useState<UserRole>('distributor');
@@ -46,7 +58,7 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
     if (!user) return null;
 
     // --- Product Handlers ---
-    const handleAddProduct = (e: React.FormEvent) => {
+    const handleAddProduct = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newProductName.trim()) return;
 
@@ -58,8 +70,9 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
             casePack: 12
         };
 
-        MockDB.saveProduct(newProd);
-        setProducts(MockDB.getProducts(targetCompanyId));
+        await MockDB.saveProduct(newProd);
+        const updated = await MockDB.getProducts(targetCompanyId);
+        setProducts(updated);
         setNewProductName('');
         setIsAddingProduct(false);
     };
@@ -69,10 +82,11 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
         setConfirmDeleteProduct(id);
     };
 
-    const confirmExecuteDeleteProduct = () => {
+    const confirmExecuteDeleteProduct = async () => {
         if (!confirmDeleteProduct) return;
-        MockDB.deleteProduct(confirmDeleteProduct);
-        setProducts(MockDB.getProducts(targetCompanyId));
+        await MockDB.deleteProduct(confirmDeleteProduct);
+        const updated = await MockDB.getProducts(targetCompanyId);
+        setProducts(updated);
         setConfirmDeleteProduct(null);
     };
 
@@ -88,19 +102,20 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
         setEditProductName('');
     };
 
-    const saveEditProduct = (e: React.MouseEvent, p: Product) => {
+    const saveEditProduct = async (e: React.MouseEvent, p: Product) => {
         e.stopPropagation();
         if (!editProductName.trim()) return;
 
         const updated = { ...p, name: editProductName };
-        MockDB.saveProduct(updated);
-        setProducts(MockDB.getProducts(targetCompanyId));
+        await MockDB.saveProduct(updated);
+        const refreshed = await MockDB.getProducts(targetCompanyId);
+        setProducts(refreshed);
         setEditingProductId(null);
         setEditProductName('');
     };
 
     // --- User Handlers ---
-    const handleAddUser = (e: React.FormEvent) => {
+    const handleAddUser = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newUserEmail.trim()) return;
 
@@ -112,8 +127,9 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
             hasAcceptedTerms: false
         };
 
-        MockDB.saveUser(newUser);
-        setCompanyUsers(MockDB.getUsers().filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
+        await MockDB.saveUser(newUser);
+        const users = await MockDB.getUsers();
+        setCompanyUsers(users.filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
         setNewUserEmail('');
         setIsAddingUser(false);
     };
@@ -122,10 +138,11 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
         setConfirmDeleteUser(u);
     };
 
-    const confirmExecuteDeleteUser = () => {
+    const confirmExecuteDeleteUser = async () => {
         if (!confirmDeleteUser) return;
-        MockDB.deleteUser(confirmDeleteUser.id);
-        setCompanyUsers(MockDB.getUsers().filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
+        await MockDB.deleteUser(confirmDeleteUser.id);
+        const users = await MockDB.getUsers();
+        setCompanyUsers(users.filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
         setConfirmDeleteUser(null);
     };
 
@@ -140,12 +157,13 @@ export function CompanyDashboard({ overrideCompanyId, onSelectProduct, onBack }:
         setEditUserEmail('');
     };
 
-    const saveEditUser = (u: User) => {
+    const saveEditUser = async (u: User) => {
         if (!editUserEmail.trim()) return;
 
         const updated = { ...u, email: editUserEmail, role: editUserRole };
-        MockDB.saveUser(updated);
-        setCompanyUsers(MockDB.getUsers().filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
+        await MockDB.saveUser(updated);
+        const users = await MockDB.getUsers();
+        setCompanyUsers(users.filter(u => u.companyId === targetCompanyId && u.role !== 'super_admin'));
         setEditingUserId(null);
     };
 
