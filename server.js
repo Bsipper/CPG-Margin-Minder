@@ -215,7 +215,8 @@ app.delete('/api/products/:id', async (req, res) => {
 // Serve the Vite React app in production
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, 'dist')));
-    app.get('*', (req, res) => {
+    // Using regex /.*/ instead of '*' to comply with Express 5 path-to-regexp strictness
+    app.get(/.*/, (req, res) => {
         res.sendFile(path.join(__dirname, 'dist', 'index.html'));
     });
 }
